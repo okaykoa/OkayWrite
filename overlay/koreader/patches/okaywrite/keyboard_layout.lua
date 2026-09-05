@@ -39,7 +39,8 @@ function M.resolve(layout_name, key_name, mods)
   local layout = M.layouts[layout_name]
 
   -- Single A-Z letter: case-fold, unless the layout defines an override
-  -- (e.g. an AltGr accent) for this key.
+  -- (e.g. an AltGr accent) for this key. Letters are resolved independent of
+  -- layout by design (only non-letter keys are layout-specific).
   if key_name:match("^[A-Z]$") then
     local entry = layout and layout[key_name]
     if mods.altgr then

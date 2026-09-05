@@ -54,4 +54,18 @@ describe("keyboard_layout.resolve (us)", function()
   it("returns nil for an unknown layout", function()
     assert.is_nil(M.resolve("dvorak", "1", { shift = true }))
   end)
+
+  it("resolves letters independent of layout (letters are layout-independent by design)", function()
+    assert.are.equal("a", M.resolve("dvorak", "A", { shift = false, altgr = false }))
+    assert.are.equal("A", M.resolve("dvorak", "A", { shift = true, altgr = false }))
+  end)
+
+  it("passes single-quote through without shift", function()
+    assert.are.equal("'", r("'"))
+  end)
+
+  it("returns nil for symbols with AltGr when no override exists", function()
+    assert.is_nil(M.resolve("us", "1", { shift = false, altgr = true }))
+    assert.is_nil(M.resolve("us", ";", { shift = true, altgr = true }))
+  end)
 end)
