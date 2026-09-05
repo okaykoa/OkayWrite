@@ -1,0 +1,6 @@
+# Downloaded KOReader release zips and built packages
+.cache/
+dist/
+
+# macOS
+.DS_Store
