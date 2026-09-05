@@ -4,14 +4,7 @@
 
 local FileManager = require("apps/filemanager/filemanager")
 local UIManager = require("ui/uimanager")
-local userpatch = require("userpatch")
 local _ = require("gettext")
-
--- Capture the texteditor plugin instance (re-instantiated per FM/Reader spin-up).
-local texteditor
-userpatch.registerPatchPluginFunc("texteditor", function(plugin)
-  texteditor = plugin
-end)
 
 local orig_getPlusDialogButtons = FileManager.getPlusDialogButtons
 FileManager.getPlusDialogButtons = function(self)
@@ -25,8 +18,15 @@ FileManager.getPlusDialogButtons = function(self)
     text = _("New file"),
     callback = function()
       if self.plus_dialog then UIManager:close(self.plus_dialog) end
-      if texteditor and folder then
-        texteditor:newFile(folder .. "/")
+      -- self.texteditor is the live instance registered by FileManager:init() via
+      -- registerModule("texteditor", plugin_or_err) (filemanager.lua:424).
+      -- It has self.ui = the FileManager, so saveFileContent's self.ui.file_chooser
+      -- dereference is safe.
+      local te = self.texteditor
+      if te and folder then
+        -- Guard against double-slash at filesystem root ("/").
+        local new_path = folder:sub(-1) == "/" and folder or folder .. "/"
+        te:newFile(new_path)
       end
     end,
   } }
