@@ -1,0 +1,57 @@
+local M = dofile("overlay/koreader/patches/okaywrite/keyboard_layout.lua")
+
+describe("keyboard_layout.resolve (us)", function()
+  local function r(name, shift, altgr)
+    return M.resolve("us", name, { shift = shift or false, altgr = altgr or false })
+  end
+
+  it("lowercases letters without shift", function()
+    assert.are.equal("a", r("A"))
+    assert.are.equal("z", r("Z"))
+  end)
+
+  it("uppercases letters with shift", function()
+    assert.are.equal("A", r("A", true))
+    assert.are.equal("Z", r("Z", true))
+  end)
+
+  it("passes digits through without shift", function()
+    assert.are.equal("1", r("1"))
+    assert.are.equal("0", r("0"))
+  end)
+
+  it("maps shifted digits to symbols", function()
+    assert.are.equal("!", r("1", true))
+    assert.are.equal("@", r("2", true))
+    assert.are.equal(")", r("0", true))
+  end)
+
+  it("maps shifted punctuation", function()
+    assert.are.equal(";", r(";"))
+    assert.are.equal(":", r(";", true))
+    assert.are.equal("/", r("/"))
+    assert.are.equal("?", r("/", true))
+    assert.are.equal("-", r("-"))
+    assert.are.equal("_", r("-", true))
+    assert.are.equal("=", r("="))
+    assert.are.equal("+", r("=", true))
+    assert.are.equal("[", r("["))
+    assert.are.equal("{", r("[", true))
+    assert.are.equal("`", r("`"))
+    assert.are.equal("~", r("`", true))
+    assert.are.equal('"', r("'", true))
+  end)
+
+  it("returns nil for keys it does not handle", function()
+    assert.is_nil(r("F1"))
+    assert.is_nil(r("Home"))
+  end)
+
+  it("returns nil for a letter under AltGr when no override exists", function()
+    assert.is_nil(r("A", false, true))
+  end)
+
+  it("returns nil for an unknown layout", function()
+    assert.is_nil(M.resolve("dvorak", "1", { shift = true }))
+  end)
+end)
