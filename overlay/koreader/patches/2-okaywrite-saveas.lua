@@ -31,7 +31,7 @@ userpatch.registerPatchPluginFunc("texteditor", function(plugin)
                             UIManager:close(file_input)
                             local path_chooser = PathChooser:new{
                                 select_file = false,
-                                path = (new_prefix or self.last_path):match("(.*)/"),
+                                path = (new_prefix or (self.last_path == "/" and "/" or self.last_path .. "/")):match("(.*)/"),
                                 onConfirm = function(dir_path)
                                     self:saveAs_helper(dir_path .. "/")
                                 end,

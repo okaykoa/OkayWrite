@@ -37,6 +37,9 @@ local EVENT_MAP_FIXES = {
     [41] = "`",
 }
 
+-- "externalkeyboard" is the directory-derived plugin name PluginLoader uses
+-- (the `name` field inside the plugin's main.lua is overwritten by the loader),
+-- so this string is correct and must not be "corrected" to match main.lua.
 userpatch.registerPatchPluginFunc("externalkeyboard", function(plugin)
     local orig_setup = plugin.setupKeyboard
     plugin.setupKeyboard = function(self, ...)
