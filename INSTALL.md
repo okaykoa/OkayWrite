@@ -85,3 +85,17 @@ Use this for a fresh device, or if you want the rebranded "OkayWrite" launcher e
 - Don't switch to USB-drive (USBMS) mode while KOReader is running.
 - This build has not been runtime-tested. Prefer Option A first: it's one file and
   trivially reversible, so a misbehaving reskin risks nothing.
+
+---
+
+## Bluetooth keyboard (optional)
+
+OkayWrite makes a physical keyboard type correctly (including shifted
+punctuation), but it does not pair the keyboard itself — Kindle's stock
+Bluetooth stack cannot. Pairing is handled outside OkayWrite by
+**kindle-hid-passthrough** (https://github.com/zampierilucas/kindle-hid-passthrough),
+which must be installed separately (install `usbnetlite` first as a recovery net,
+and use its minimal daemon + KOReader-plugin path — not the full installer).
+
+Once a keyboard is paired and connected, OkayWrite's layout patch handles typing;
+no configuration is needed. US layout is provided by default.

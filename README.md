@@ -39,8 +39,8 @@ present in the binary but out of the way.
 | Area | Status | Notes |
 |------|--------|-------|
 | **On-screen keyboard** | ✅ works | KOReader's built-in Text editor keyboard. |
-| **Bluetooth keyboard** | 🔎 spike | First-class input goal; needs a spike to confirm behavior on the target Kindle. |
-| **Multi-file management** | ✅ mostly | KOReader's FileManager, scoped to the writing folder (create / rename / organize `.txt`/`.md`). |
+| **Bluetooth keyboard** | ✅ works (correct layout) | OkayWrite provides a real US layout (Shift + AltGr) via userpatch. Requires `kindle-hid-passthrough` for pairing. |
+| **Multi-file management** | ✅ mostly | KOReader's FileManager, scoped to the writing folder (create / rename / organize `.txt`/`.md`). The "+" menu offers **New file**, and the editor has **Save as**. |
 | **Export — USB copy** | ✅ works | Files are plain `.txt`/`.md` under `/mnt/us/OkayWrite`; mount over USB and copy them off. The reliable baseline. |
 | **Export — wireless / cloud sync** | 🔎 spike (primary) | Salvage KOReader's Dropbox / WebDAV / FTP sync; spike to confirm it works on-device and survives trimming. |
 | **Export — QR snippet-share** | 💡 nice-to-have | Use KOReader's QR widget to render a short note on-screen to scan with a phone. Snippet-sized only (QR + e-ink is capacity-limited), not a whole-document path. |
