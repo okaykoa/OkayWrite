@@ -29,7 +29,9 @@ build — but light-touch overlay is the default until then.
   (KOReader already supports this; we just set it as the default).
 - The file browser opens in a dedicated **`/mnt/us/OkayWrite`** folder.
 - The app always boots into the file browser, never the reader.
-- Keeps KOReader's ~60 UI localizations for free.
+- Ships only the plugins and languages a notepad needs — dictionary/OPDS/cloud-sync/statistics/etc. plugins, and every UI language outside English/French/Italian/German/Spanish, are deleted at build time, not just hidden.
+- Physical (Bluetooth) keyboard support covers English/French/Italian/German/Spanish layouts, including terminal-style Alt+Left/Right (word jump) and Cmd+Left/Right (line start/end).
+- The reader engine and PDF/EPUB code are still present in the shipped binary — KOReader's file manager has real code dependencies on parts of the reader app (dictionary/Wikipedia lookups), so it can't be cleanly deleted. It's unreachable through normal use, same as before, just not physically removed.
 
 Everything reading-related (documents, PDF/EPUB engines, most plugins) is still technically
 present in the binary but out of the way.
@@ -39,10 +41,10 @@ present in the binary but out of the way.
 | Area | Status | Notes |
 |------|--------|-------|
 | **On-screen keyboard** | ✅ works | KOReader's built-in Text editor keyboard. |
-| **Bluetooth keyboard** | ✅ implemented (US layout, Shift incl. punctuation) — pending on-device verification | OkayWrite provides a real US layout (Shift + AltGr) via userpatch. Requires `kindle-hid-passthrough` for pairing. |
+| **Bluetooth keyboard** | ✅ implemented (English/French/Italian/German/Spanish, Shift incl. punctuation) — pending on-device verification | OkayWrite provides real layouts for English/French/Italian/German/Spanish (Shift + AltGr) via userpatch. Requires `kindle-hid-passthrough` for pairing. Note: Spanish accented vowels (á é í ó ú) are not typeable via physical keyboard (dead-key limitation) but can be entered via the on-screen keyboard. |
 | **Multi-file management** | ✅ mostly | KOReader's FileManager, scoped to the writing folder (create / rename / organize `.txt`/`.md`). The "+" menu offers **New file**, and the editor has **Save as**. |
 | **Export — USB copy** | ✅ works | Files are plain `.txt`/`.md` under `/mnt/us/OkayWrite`; mount over USB and copy them off. The reliable baseline. |
-| **Export — wireless / cloud sync** | 🔎 spike (primary) | Salvage KOReader's Dropbox / WebDAV / FTP sync; spike to confirm it works on-device and survives trimming. |
+| **Export — wireless / cloud sync** | ❌ dropped | Wireless and cloud-sync plugins are deleted by the build-time prune step; not deferred, but removed from this trimmed app. |
 | **Export — QR snippet-share** | 💡 nice-to-have | Use KOReader's QR widget to render a short note on-screen to scan with a phone. Snippet-sized only (QR + e-ink is capacity-limited), not a whole-document path. |
 
 Deeper feature work (wireless sync, QR, any actual stripping/fork) is future and each gets
