@@ -17,11 +17,11 @@ e-ink, driven primarily by a **Bluetooth keyboard** (with the on-screen keyboard
 supported as a fallback), simple **multi-file management**, and an easy way to get
 finished notes **off the device**.
 
-**Strategy — overlay now, strip later.** Today OkayWrite ships KOReader's prebuilt binary
-unchanged and reskins it via userpatches; "salvage what enables writing, discard the rest"
-is achieved first by *hiding and disabling* the non-writing surfaces, not by forking. Over
-time, if it earns its cost, the project may progressively strip toward a purpose-built
-build — but light-touch overlay is the default until then.
+**Strategy — overlay first, then strip.** OkayWrite ships KOReader's prebuilt binary and
+layers a userpatch overlay ("costume") that reskins it into a writing app. Non-writing
+surfaces, plugins, and language data are progressively stripped at build time; what
+remains is hidden and disabled through the overlay. This layered approach keeps the app
+lightweight while staying close to upstream KOReader.
 
 ## What it does (today)
 
@@ -32,9 +32,6 @@ build — but light-touch overlay is the default until then.
 - Ships only the plugins and languages a notepad needs — dictionary/OPDS/cloud-sync/statistics/etc. plugins, and every UI language outside English/French/Italian/German/Spanish, are deleted at build time, not just hidden.
 - Physical (Bluetooth) keyboard support covers English/French/Italian/German/Spanish layouts, including terminal-style Alt+Left/Right (word jump) and Cmd+Left/Right (line start/end).
 - The reader engine and PDF/EPUB code are still present in the shipped binary — KOReader's file manager has real code dependencies on parts of the reader app (dictionary/Wikipedia lookups), so it can't be cleanly deleted. It's unreachable through normal use, same as before, just not physically removed.
-
-Everything reading-related (documents, PDF/EPUB engines, most plugins) is still technically
-present in the binary but out of the way.
 
 ## Roadmap
 
@@ -47,8 +44,7 @@ present in the binary but out of the way.
 | **Export — wireless / cloud sync** | ❌ dropped | Wireless and cloud-sync plugins are deleted by the build-time prune step; not deferred, but removed from this trimmed app. |
 | **Export — QR snippet-share** | 💡 nice-to-have | Use KOReader's QR widget to render a short note on-screen to scan with a phone. Snippet-sized only (QR + e-ink is capacity-limited), not a whole-document path. |
 
-Deeper feature work (wireless sync, QR, any actual stripping/fork) is future and each gets
-its own design pass.
+Deeper feature work (QR, any actual stripping/fork) is future and each gets its own design pass.
 
 ## Repository layout
 
