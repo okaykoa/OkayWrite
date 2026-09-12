@@ -34,7 +34,8 @@ end
 local ALTGR_KEYS = { "RAlt" }
 
 -- 1) Normalize the external-keyboard event map so punctuation keys have correct
---    names. Applied by wrapping the plugin's setupKeyboard (runs on connect).
+--    names, and so Alt/Meta are tracked as held modifiers at all. Applied by
+--    wrapping the plugin's setupKeyboard (runs on connect).
 --
 -- Confirmed missing/wrong at tag v2026.07.1 in event_map_keyboard.lua:
 --   [12] absent  → "-"     KEY_MINUS
@@ -44,6 +45,13 @@ local ALTGR_KEYS = { "RAlt" }
 --   [39] = ":"   → ";"     KEY_SEMICOLON  (wrong: should be base char)
 --   [41] absent  → "`"     KEY_GRAVE
 -- Already correct: [40]="'", [43]="\\", [51]=",", [52]=".", [53]="/"
+--
+-- Device.input.modifiers (frontend/device/input.lua) only tracks the exact
+-- names "Alt"/"Ctrl"/"Shift"/"Sym"/"Meta"/"ScreenKB" as held state, but this
+-- event map reports "LAlt"/"RAlt"/"LCtrl"/"LMeta"/"RMeta" -- none of which
+-- match "Alt"/"Meta" literally, so those two are never tracked as held
+-- through this map. Renaming Left-Alt and both Meta keys to the generic
+-- names fixes that; Right-Alt stays "RAlt" (reserved for AltGr, see above).
 local EVENT_MAP_FIXES = {
     [12] = "-",
     [13] = "=",
@@ -51,6 +59,9 @@ local EVENT_MAP_FIXES = {
     [27] = "]",
     [39] = ";",
     [41] = "`",
+    [56] = "Alt",   -- KEY_LEFTALT (was "LAlt")
+    [125] = "Meta", -- KEY_LEFTMETA (was "LMeta")
+    [126] = "Meta", -- KEY_RIGHTMETA (was "RMeta")
 }
 
 -- "externalkeyboard" is the directory-derived plugin name PluginLoader uses
@@ -75,29 +86,51 @@ end)
 local orig_onKeyPress = InputText.onKeyPress
 InputText.onKeyPress = function(self, key)
     if not Device:isSDL() and type(key.key) == "string" then
-        -- Only intercept when modifiers are a subset of { Shift, AltGr }.
-        local shift = key["Shift"] and true or false
-        local altgr = false
-        for _, n in ipairs(ALTGR_KEYS) do
-            if key[n] then altgr = true end
-        end
-
-        local other_modifier = false
-        for name, flag in pairs(key.modifiers or {}) do
-            if flag and name ~= "Shift" then
-                local is_altgr = false
-                for _, n in ipairs(ALTGR_KEYS) do
-                    if name == n then is_altgr = true end
+        if key.key == "Left" or key.key == "Right" then
+            -- Terminal-style word/line movement. Plain and otherwise-modified
+            -- Left/Right fall through to the original (arrow move, etc.).
+            local mods = key.modifiers or {}
+            if mods["Alt"] and not mods["Meta"] then
+                if key.key == "Left" then
+                    self:moveCursorToCharPos(self:getStringPos(true, true))
+                else
+                    local _, end_pos = self:getStringPos(true, false)
+                    self:moveCursorToCharPos(end_pos + 1)
                 end
-                if not is_altgr then other_modifier = true end
-            end
-        end
-
-        if not other_modifier then
-            local ch = layout.resolve(getActiveLayout(), key.key, { shift = shift, altgr = altgr })
-            if ch then
-                self:addChars(ch)
                 return true
+            elseif mods["Meta"] and not mods["Alt"] then
+                if key.key == "Left" then
+                    self:goToStartOfLine()
+                else
+                    self:goToEndOfLine()
+                end
+                return true
+            end
+        else
+            -- Only intercept when modifiers are a subset of { Shift, AltGr }.
+            local shift = key["Shift"] and true or false
+            local altgr = false
+            for _, n in ipairs(ALTGR_KEYS) do
+                if key[n] then altgr = true end
+            end
+
+            local other_modifier = false
+            for name, flag in pairs(key.modifiers or {}) do
+                if flag and name ~= "Shift" then
+                    local is_altgr = false
+                    for _, n in ipairs(ALTGR_KEYS) do
+                        if name == n then is_altgr = true end
+                    end
+                    if not is_altgr then other_modifier = true end
+                end
+            end
+
+            if not other_modifier then
+                local ch = layout.resolve(getActiveLayout(), key.key, { shift = shift, altgr = altgr })
+                if ch then
+                    self:addChars(ch)
+                    return true
+                end
             end
         end
     end
