@@ -9,7 +9,23 @@ local DataStorage = require("datastorage")
 local userpatch = require("userpatch")
 
 local layout = dofile(DataStorage:getPatchesDir() .. "/okaywrite/keyboard_layout.lua")
-local ACTIVE_LAYOUT = "us"
+
+-- Physical layout follows the UI language setting; anything without a
+-- dedicated M.layouts entry falls back to "us". "C" is KOReader's
+-- untranslated-source-strings locale (English) -- there is no separate "en"
+-- locale upstream.
+local LANGUAGE_TO_KEYBOARD_LAYOUT = {
+    C = "us",
+    en_GB = "us",
+    de = "de",
+    es = "es",
+    fr = "fr",
+    it_IT = "it",
+}
+local function getActiveLayout()
+    local lang = G_reader_settings:readSetting("language") or "C"
+    return LANGUAGE_TO_KEYBOARD_LAYOUT[lang] or "us"
+end
 
 -- Right-Alt modifier name confirmed via event_map_keyboard.lua: [100] = "RAlt".
 -- Note: Input.modifiers does not include RAlt by default, so AltGr state is
@@ -78,7 +94,7 @@ InputText.onKeyPress = function(self, key)
         end
 
         if not other_modifier then
-            local ch = layout.resolve(ACTIVE_LAYOUT, key.key, { shift = shift, altgr = altgr })
+            local ch = layout.resolve(getActiveLayout(), key.key, { shift = shift, altgr = altgr })
             if ch then
                 self:addChars(ch)
                 return true
