@@ -1,6 +1,7 @@
 -- OkayWrite physical-keyboard layout resolver (dependency-free, unit-testable).
--- Maps (key name, modifier level) -> produced character. Letters are handled by
--- case-folding; only non-letter keys live in the layout tables.
+-- Maps (key name, modifier level) -> produced character. A layout entry for a
+-- key name always wins, whether that key is a letter or not; a bare A-Z key
+-- with no entry falls back to case-folded identity.
 
 local M = {}
 
@@ -32,33 +33,35 @@ M.layouts = {
 
 -- key_name: the KOReader key name (letters arrive upper-case, e.g. "A"; symbols
 --           arrive as their base char, e.g. ";"). mods = { shift, altgr }.
+--
+-- A layout entry (M.layouts[layout_name][key_name]) always wins when present,
+-- whether key_name is a letter or not -- this is how a layout repositions a
+-- letter (e.g. AZERTY's "Q" position produces "a") or turns a US letter
+-- position into punctuation (e.g. AZERTY's "M" position produces ","). With
+-- no entry, a single A-Z key_name falls back to case-folded identity (the
+-- "us" layout has no letter entries at all, since identity is exactly
+-- correct for it already); anything else with no entry is unhandled.
 function M.resolve(layout_name, key_name, mods)
   mods = mods or {}
   if type(key_name) ~= "string" then return nil end
 
   local layout = M.layouts[layout_name]
+  local entry = layout and layout[key_name]
 
-  -- Single A-Z letter: case-fold, unless the layout defines an override
-  -- (e.g. an AltGr accent) for this key. Letters are resolved independent of
-  -- layout by design (only non-letter keys are layout-specific).
-  if key_name:match("^[A-Z]$") then
-    local entry = layout and layout[key_name]
-    if mods.altgr then
-      return entry and (mods.shift and entry.shift_altgr or entry.altgr) or nil
-    end
-    return mods.shift and key_name or key_name:lower()
+  if entry then
+    local level
+    if mods.shift and mods.altgr then level = "shift_altgr"
+    elseif mods.altgr then level = "altgr"
+    elseif mods.shift then level = "shift"
+    else level = "base" end
+    return entry[level]
   end
 
-  if not layout then return nil end
-  local entry = layout[key_name]
-  if not entry then return nil end
-
-  local level
-  if mods.shift and mods.altgr then level = "shift_altgr"
-  elseif mods.altgr then level = "altgr"
-  elseif mods.shift then level = "shift"
-  else level = "base" end
-  return entry[level]
+  if key_name:match("^[A-Z]$") then
+    if mods.altgr then return nil end
+    return mods.shift and key_name or key_name:lower()
+  end
+  return nil
 end
 
 return M
