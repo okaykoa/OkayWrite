@@ -38,6 +38,49 @@ else
     GENERATIONS=("${GENERATIONS_DEFAULT[@]}")
 fi
 
+prune_release() {
+    local work="$1"
+    local ko="$work/koreader"
+
+    echo "    pruning to notepad-only"
+
+    # Non-notepad plugins.
+    while IFS= read -r plugin; do
+        [[ -z "$plugin" || "$plugin" == \#* ]] && continue
+        rm -rf "$ko/plugins/$plugin"
+    done < "$OVERLAY_DIR/koreader/prune/plugins-delete.txt"
+
+    # Cloud storage app (its one reachable menu entry is removed by
+    # 2-okaywrite-menus.lua; this removes the underlying implementation too).
+    rm -rf "$ko/frontend/apps/cloudstorage"
+
+    # Non-EFIGS localization data (l10n/LICENSE and l10n/README.md are text
+    # files, not language directories, and are left alone by the */ glob).
+    for dir in "$ko/l10n"/*/; do
+        local lang; lang="$(basename "$dir")"
+        if ! grep -qx "$lang" "$OVERLAY_DIR/koreader/prune/l10n-keep.txt"; then
+            rm -rf "$dir"
+        fi
+    done
+
+    # Non-EFIGS on-screen keyboard layouts. generic_ime.lua is only used by
+    # the CJK IME layouts already excluded above.
+    local kb_dir="$ko/frontend/ui/data/keyboardlayouts"
+    rm -f "$kb_dir/generic_ime.lua"
+    for f in "$kb_dir"/*.lua; do
+        local name; name="$(basename "$f")"
+        if ! grep -qx "$name" "$OVERLAY_DIR/koreader/prune/keyboardlayouts-keep.txt"; then
+            rm -f "$f"
+        fi
+    done
+    for f in "$kb_dir/keypopup"/*.lua; do
+        local name; name="keypopup/$(basename "$f")"
+        if ! grep -qx "$name" "$OVERLAY_DIR/koreader/prune/keyboardlayouts-keep.txt"; then
+            rm -f "$f"
+        fi
+    done
+}
+
 build_one() {
     local gen="$1"
     local zip_name="koreader-${gen}-${KO_VERSION}.zip"
@@ -55,6 +98,8 @@ build_one() {
 
     echo "==> [$gen] extracting"
     unzip -q "$cached" -d "$work"
+
+    prune_release "$work"
 
     echo "==> [$gen] applying overlay"
     # Copy overlay tree (patches/, etc.) into the extracted package.
