@@ -160,3 +160,30 @@ describe("keyboard_layout.resolve (it)", function()
     assert.are.equal("£", r("3", true))
   end)
 end)
+
+describe("keyboard_layout.resolve (es)", function()
+  local function r(name, shift, altgr)
+    return M.resolve("es", name, { shift = shift or false, altgr = altgr or false })
+  end
+
+  it("does not reposition any letters", function()
+    assert.are.equal("q", r("Q"))
+  end)
+
+  it("puts ñ, ¡, ¿ on their dedicated base-level keys", function()
+    assert.are.equal("ñ", r(";"))
+    assert.are.equal("Ñ", r(";", true))
+    assert.are.equal("¡", r("="))
+    assert.are.equal("¿", r("=", true))
+  end)
+
+  it("leaves the accent dead keys unmapped (dead keys are out of scope)", function()
+    assert.is_nil(r("["))
+    assert.is_nil(r("'"))
+  end)
+
+  it("maps the shifted digit row to Spanish symbols", function()
+    assert.are.equal("!", r("1", true))
+    assert.are.equal("·", r("3", true))
+  end)
+end)

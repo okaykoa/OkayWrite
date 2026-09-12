@@ -107,6 +107,30 @@ M.layouts = {
     ["9"] = { base = "9", shift = ")" },
     ["0"] = { base = "0", shift = "=" },
   },
+  es = {
+    ["`"] = { base = "º", shift = "ª" },
+    ["-"] = { base = "'", shift = "?" },
+    ["="] = { base = "¡", shift = "¿" },
+    ["]"] = { base = "+", shift = "*" },
+    [";"] = { base = "ñ", shift = "Ñ" },
+    [","] = { base = ",", shift = ";" },
+    ["."] = { base = ".", shift = ":" },
+    ["/"] = { base = "-", shift = "_" },
+    ["1"] = { base = "1", shift = "!" },
+    ["2"] = { base = "2", shift = '"' },
+    ["3"] = { base = "3", shift = "·" },
+    ["4"] = { base = "4", shift = "$" },
+    ["5"] = { base = "5", shift = "%" },
+    ["6"] = { base = "6", shift = "&" },
+    ["7"] = { base = "7", shift = "/" },
+    ["8"] = { base = "8", shift = "(" },
+    ["9"] = { base = "9", shift = ")" },
+    ["0"] = { base = "0", shift = "=" },
+    -- "[" (dead-key ` on real ES hardware) and "'" (dead-key ´) are
+    -- deliberately unmapped: accented vowels (á é í ó ú) need a compose
+    -- sequence, out of scope per the spec's non-goals. Only ñ/¡/¿ -- all
+    -- dedicated keys, not dead keys -- are supported.
+  },
 }
 
 -- key_name: the KOReader key name (letters arrive upper-case, e.g. "A"; symbols
