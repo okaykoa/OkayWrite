@@ -136,3 +136,27 @@ describe("keyboard_layout.resolve (de)", function()
     assert.are.equal("§", r("3", true))
   end)
 end)
+
+describe("keyboard_layout.resolve (it)", function()
+  local function r(name, shift, altgr)
+    return M.resolve("it", name, { shift = shift or false, altgr = altgr or false })
+  end
+
+  it("does not reposition any letters", function()
+    assert.are.equal("q", r("Q"))
+    assert.are.equal("Q", r("Q", true))
+  end)
+
+  it("puts accented vowels on their dedicated base-level keys", function()
+    assert.are.equal("è", r("["))
+    assert.are.equal("é", r("[", true))
+    assert.are.equal("ò", r(";"))
+    assert.are.equal("à", r("'"))
+    assert.are.equal("ì", r("="))
+  end)
+
+  it("maps the shifted digit row to Italian symbols", function()
+    assert.are.equal("!", r("1", true))
+    assert.are.equal("£", r("3", true))
+  end)
+end)
