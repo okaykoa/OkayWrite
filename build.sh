@@ -105,6 +105,11 @@ build_one() {
     # Copy overlay tree (patches/, etc.) into the extracted package.
     cp -R "$OVERLAY_DIR/"* "$work/"
 
+    # The overlay copy above merges overlay/koreader/prune/ (build-tooling
+    # keep/delete lists already consumed by prune_release) into the
+    # extracted tree; remove it so it doesn't ship in the packaged zip.
+    rm -rf "$work/koreader/prune"
+
     echo "==> [$gen] rebranding to $APP_NAME"
     # menu.json: every visible "KOReader" -> app name. Case-sensitive, so the
     # lowercase install paths (/mnt/us/koreader, koreader.sh, *_koreader params)
