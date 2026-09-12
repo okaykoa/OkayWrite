@@ -29,6 +29,37 @@ M.layouts = {
     ["."] = { base = ".", shift = ">" },
     ["/"] = { base = "/", shift = "?" },
   },
+  fr = {
+    -- AZERTY repositions some letters; give them explicit entries (anything
+    -- else falls back to identity, same as "us").
+    ["Q"] = { base = "a", shift = "A" },
+    ["A"] = { base = "q", shift = "Q" },
+    ["W"] = { base = "z", shift = "Z" },
+    ["Z"] = { base = "w", shift = "W" },
+    -- US "M" position produces AZERTY's comma key; the accented letters that
+    -- sit under US ;/' on a US board take its place instead.
+    ["M"] = { base = ",", shift = "?" },
+    [","] = { base = ";", shift = "." },
+    ["."] = { base = ":", shift = "/" },
+    ["/"] = { base = "!", shift = "§" },
+    [";"] = { base = "m", shift = "M" },
+    ["'"] = { base = "ù", shift = "%" },
+    -- Digit row: AZERTY is unshifted-symbol / shifted-digit, opposite of US.
+    ["1"] = { base = "&", shift = "1" },
+    ["2"] = { base = "é", shift = "2" },
+    ["3"] = { base = '"', shift = "3" },
+    ["4"] = { base = "'", shift = "4" },
+    ["5"] = { base = "(", shift = "5" },
+    ["6"] = { base = "-", shift = "6" },
+    ["7"] = { base = "è", shift = "7" },
+    ["8"] = { base = "_", shift = "8" },
+    ["9"] = { base = "ç", shift = "9" },
+    ["0"] = { base = "à", shift = "0" },
+    ["-"] = { base = ")", shift = "°" },
+    ["="] = { base = "=", shift = "+" },
+    ["]"] = { base = "$", shift = "£" },
+    ["\\"] = { base = "*", shift = "µ" },
+  },
 }
 
 -- key_name: the KOReader key name (letters arrive upper-case, e.g. "A"; symbols
