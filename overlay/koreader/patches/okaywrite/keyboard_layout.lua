@@ -59,6 +59,9 @@ M.layouts = {
     ["="] = { base = "=", shift = "+" },
     ["]"] = { base = "$", shift = "£" },
     ["\\"] = { base = "*", shift = "µ" },
+    -- ANSI backtick position: AZERTY's ² (superscript two) key. No distinct
+    -- shifted glyph on real hardware -- Shift produces the same character.
+    ["`"] = { base = "²", shift = "²" },
   },
   de = {
     ["Y"] = { base = "z", shift = "Z" },
@@ -130,6 +133,10 @@ M.layouts = {
     -- deliberately unmapped: accented vowels (á é í ó ú) need a compose
     -- sequence, out of scope per the spec's non-goals. Only ñ/¡/¿ -- all
     -- dedicated keys, not dead keys -- are supported.
+    -- ANSI backslash position: a legacy key from Spanish typewriters, not a
+    -- dead key, so it's in scope even though the compose-based accents above
+    -- aren't.
+    ["\\"] = { base = "ç", shift = "Ç" },
   },
 }
 
