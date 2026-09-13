@@ -39,7 +39,7 @@ present in the binary but out of the way.
 | Area | Status | Notes |
 |------|--------|-------|
 | **On-screen keyboard** | ✅ works | KOReader's built-in Text editor keyboard. |
-| **Bluetooth keyboard** | ✅ implemented (US layout, Shift incl. punctuation) — pending on-device verification | OkayWrite provides a real US layout (Shift + AltGr) via userpatch. Requires `kindle-hid-passthrough` for pairing. |
+| **Bluetooth keyboard** | ✅ implemented (US layout, Shift incl. punctuation, terminal-style word/line movement) — pending on-device verification | OkayWrite provides a real US layout (Shift + AltGr) via userpatch, plus Alt+Left/Right (word jump) and Cmd+Left/Right (line start/end). Requires `kindle-hid-passthrough` for pairing. |
 | **Multi-file management** | ✅ mostly | KOReader's FileManager, scoped to the writing folder (create / rename / organize `.txt`/`.md`). The "+" menu offers **New file**, and the editor has **Save as**. |
 | **Export — USB copy** | ✅ works | Files are plain `.txt`/`.md` under `/mnt/us/OkayWrite`; mount over USB and copy them off. The reliable baseline. |
 | **Export — wireless / cloud sync** | 🔎 spike (primary) | Salvage KOReader's Dropbox / WebDAV / FTP sync; spike to confirm it works on-device and survives trimming. |
