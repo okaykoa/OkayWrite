@@ -9,7 +9,6 @@ coverimage.koplugin
 docsettingtweak.koplugin
 exporter.koplugin
 hello.koplugin
-hotkeys.koplugin
 httpinspector.koplugin
 japanese.koplugin
 keepalive.koplugin
