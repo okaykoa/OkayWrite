@@ -73,10 +73,34 @@ local EVENT_MAP_FIXES = {
 -- "externalkeyboard" is the directory-derived plugin name PluginLoader uses
 -- (the `name` field inside the plugin's main.lua is overwritten by the loader),
 -- so this string is correct and must not be "corrected" to match main.lua.
+--
+-- Some BT-keyboard passthrough setups (e.g. kindle-hid-passthrough) expose a
+-- single physical keyboard as more than one HID interface/event node. The
+-- plugin's own findAndSetupKeyboards() deliberately opens an event reader for
+-- every node it finds -- per its own comment, "only one would emit the
+-- events... the solution is to open all of them", since it can't otherwise
+-- tell in advance which one is live. When more than one node for the SAME
+-- keyboard actually does emit events, every keystroke is delivered twice
+-- (doubled characters, and Left/Right+modifier navigation firing/canceling
+-- unpredictably). Dedupe by device name: skip opening a second reader for a
+-- name we've already successfully configured.
+--
+-- This only covers the startup/already-connected enumeration path
+-- (setupKeyboard called with a table argument, via findAndSetupKeyboards).
+-- The hotplug path (onEvdevInputInsert -> setupKeyboard(event_path), a bare
+-- string) resolves the device name internally via a local, unexported
+-- function, so it isn't visible here to dedupe against before the fd opens.
+local configured_keyboard_names = {}
 userpatch.registerPatchPluginFunc("externalkeyboard", function(plugin)
     local orig_setup = plugin.setupKeyboard
-    plugin.setupKeyboard = function(self, ...)
-        local ret = orig_setup(self, ...)
+    plugin.setupKeyboard = function(self, data, ...)
+        if type(data) == "table" and data.name and configured_keyboard_names[data.name] then
+            return
+        end
+        local ret = orig_setup(self, data, ...)
+        if type(data) == "table" and data.name and self.keyboard_fds[data.event_path] then
+            configured_keyboard_names[data.name] = true
+        end
         local em = Device.input and Device.input.event_map
         if em then
             for code, name in pairs(EVENT_MAP_FIXES) do
@@ -123,6 +147,19 @@ InputText.onKeyPress = function(self, key)
                 else
                     self:goToEndOfLine()
                 end
+                return true
+            end
+        elseif key.key == "Backspace" or key.key == "Del" then
+            -- Mirrors the Left/Right convention above: Alt = word-level,
+            -- Meta = line-level. There's no established Mac convention for
+            -- Meta+Del (delete to end of line), so it's left unbound here --
+            -- Meta+Del falls through to the original (plain forward-delete).
+            local mods = key.modifiers or {}
+            if mods["Alt"] and not mods["Meta"] then
+                self:delWord(key.key == "Backspace")
+                return true
+            elseif mods["Meta"] and not mods["Alt"] and key.key == "Backspace" then
+                self:delToStartOfLine()
                 return true
             end
         else

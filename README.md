@@ -30,7 +30,7 @@ lightweight while staying close to upstream KOReader.
 - The file browser opens in a dedicated **`/mnt/us/OkayWrite`** folder.
 - The app always boots into the file browser, never the reader.
 - Ships only the plugins and languages a notepad needs — OPDS/cloud-sync/statistics/etc. plugins, and every UI language outside English/French/Italian/German/Spanish, are deleted at build time, not just hidden.
-- Physical (Bluetooth) keyboard support covers English/French/Italian/German/Spanish layouts, including terminal-style Alt+Left/Right (word jump) and Cmd+Left/Right (line start/end).
+- Physical (Bluetooth) keyboard support covers English/French/Italian/German/Spanish layouts, including terminal-style Alt+Left/Right (word jump), Cmd+Left/Right (line start/end), Alt+Backspace/Delete (delete word), and Cmd+Backspace (delete to start of line).
 - The reader engine and PDF/EPUB code are still present in the shipped binary — KOReader's file manager has real code dependencies on parts of the reader app (dictionary/Wikipedia lookups), so it can't be cleanly deleted. It's unreachable through normal use, same as before, just not physically removed.
 
 ## Roadmap

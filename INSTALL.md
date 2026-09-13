@@ -99,3 +99,12 @@ and use its minimal daemon + KOReader-plugin path — not the full installer).
 
 Once a keyboard is paired and connected, OkayWrite's layout patch handles typing;
 no configuration is needed. US layout is provided by default.
+
+**If every keystroke types twice:** some passthrough setups expose one physical
+keyboard as more than one HID event interface, and KOReader's external-keyboard
+plugin opens a reader for each one it finds (it can't otherwise tell which is
+live). OkayWrite's patch dedupes by device name so only the first successfully
+opened interface is used. If a *different* keyboard model needs its second
+interface instead of its first, typing may stop working entirely rather than
+doubling — that's a per-device limitation, not something to debug blind; open
+an issue with your keyboard's `/proc/bus/input/devices` entry.
