@@ -6,7 +6,6 @@
 -- since both menus are hardcoded Lua tables, not directory scans.
 
 local _ = require("gettext")
-local FileManagerMenu = require("apps/filemanager/filemanagermenu")
 local Language = require("ui/language")
 local VirtualKeyboard = require("ui/widget/virtualkeyboard")
 
@@ -45,8 +44,19 @@ for lang in pairs(VirtualKeyboard.lang_has_submenu) do
 end
 
 -- 3) Remove the file manager's "Cloud storage" menu entry.
-local orig_setUpdateItemTable = FileManagerMenu.setUpdateItemTable
-FileManagerMenu.setUpdateItemTable = function(self, ...)
-    orig_setUpdateItemTable(self, ...)
-    self.menu_items.cloud_storage = nil
+--    setUpdateItemTable() populates self.menu_items.cloud_storage and then
+--    hands the whole table to MenuSorter:mergeAndSort(), which moves (not
+--    copies) each entry out of item_table and into the returned
+--    tab_item_table that's actually rendered -- by the time
+--    setUpdateItemTable() returns, cloud_storage is already baked into the
+--    rendered menu, so nil-ing it afterward (as a wrapper around
+--    setUpdateItemTable itself) is a no-op. Intercept one level lower,
+--    inside mergeAndSort, before it hands the item table to sort().
+local MenuSorter = require("ui/menusorter")
+local orig_mergeAndSort = MenuSorter.mergeAndSort
+MenuSorter.mergeAndSort = function(self, config_prefix, item_table, order)
+    if config_prefix == "filemanager" then
+        item_table.cloud_storage = nil
+    end
+    return orig_mergeAndSort(self, config_prefix, item_table, order)
 end
