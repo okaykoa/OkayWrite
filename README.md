@@ -103,5 +103,9 @@ KOReader runs Lua "userpatches" from `koreader/patches/` at defined startup phas
 per-extension default provider (`txt`/`md` → `texteditor`), the home directory, and
 `start_with = filemanager`. Because `FileManager:openFile` consults auxiliary providers,
 tapping a file opens the editor instead of the reader. No core files are modified, so
-upgrading to a newer KOReader release is just a matter of bumping `KO_VERSION` and
-rebuilding.
+upgrading to a newer KOReader release is mostly a matter of bumping `KO_VERSION` and
+rebuilding — but also re-validate that the prune keep-lists (`overlay/koreader/prune/
+l10n-keep.txt` and `keyboardlayouts-keep.txt`) still match upstream's file layout;
+`build.sh` asserts every keep-listed entry actually exists in the release and fails
+the build loudly if one is missing (e.g. renamed or removed upstream), rather than
+silently shipping a package missing a file the app needs.

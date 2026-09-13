@@ -79,6 +79,28 @@ prune_release() {
             rm -f "$f"
         fi
     done
+
+    # Fail loudly if a keep-listed entry doesn't actually exist in this
+    # release (e.g. a future KO_VERSION bump renamed or removed it) --
+    # otherwise the loops above silently do nothing for a missing entry and
+    # the build would ship a package quietly missing a file the app needs.
+    while IFS= read -r lang; do
+        [[ -z "$lang" || "$lang" == \#* ]] && continue
+        if [[ ! -d "$ko/l10n/$lang" ]]; then
+            echo "ERROR: l10n-keep.txt lists '$lang' but $ko/l10n/$lang does not exist." >&2
+            echo "       Upstream's l10n layout may have changed for $KO_VERSION -- re-validate prune/l10n-keep.txt." >&2
+            exit 1
+        fi
+    done < "$OVERLAY_DIR/koreader/prune/l10n-keep.txt"
+
+    while IFS= read -r name; do
+        [[ -z "$name" || "$name" == \#* ]] && continue
+        if [[ ! -f "$kb_dir/$name" ]]; then
+            echo "ERROR: keyboardlayouts-keep.txt lists '$name' but $kb_dir/$name does not exist." >&2
+            echo "       Upstream's keyboard-layout file layout may have changed for $KO_VERSION -- re-validate prune/keyboardlayouts-keep.txt." >&2
+            exit 1
+        fi
+    done < "$OVERLAY_DIR/koreader/prune/keyboardlayouts-keep.txt"
 }
 
 build_one() {
