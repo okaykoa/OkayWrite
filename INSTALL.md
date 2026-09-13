@@ -100,11 +100,12 @@ and use its minimal daemon + KOReader-plugin path — not the full installer).
 Once a keyboard is paired and connected, OkayWrite's layout patch handles typing;
 no configuration is needed. US layout is provided by default.
 
-**If every keystroke types twice:** some passthrough setups expose one physical
-keyboard as more than one HID event interface, and KOReader's external-keyboard
-plugin opens a reader for each one it finds (it can't otherwise tell which is
-live). OkayWrite's patch dedupes by device name so only the first successfully
-opened interface is used. If a *different* keyboard model needs its second
-interface instead of its first, typing may stop working entirely rather than
-doubling — that's a per-device limitation, not something to debug blind; open
-an issue with your keyboard's `/proc/bus/input/devices` entry.
+**If every keystroke types twice:** some `kindle-hid-passthrough` setups
+deliver a duplicate raw key-down report for a single physical keystroke (not
+two competing device readers — confirmed via a single `/proc/bus/input/devices`
+entry). OkayWrite's patch drops a second identical (key, modifier) event that
+arrives within 50ms of the first, since that's far faster than a human can
+physically repeat the same key, but easily explained by a duplicated report.
+If typing still doubles after updating, or single legitimate fast keystrokes
+start getting swallowed, open an issue — the timing threshold may need
+tuning for your specific passthrough setup.
