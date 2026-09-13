@@ -10,6 +10,12 @@ local userpatch = require("userpatch")
 
 local layout = dofile(DataStorage:getPatchesDir() .. "/okaywrite/keyboard_layout.lua")
 
+-- Must match InputText:getStringPos's own `is_word` delimiter pattern exactly
+-- (frontend/ui/widget/inputtext.lua) -- duplicated here because getStringPos
+-- doesn't expose it as a parameter. If that pattern ever changes upstream,
+-- update this too.
+local WORD_DELIMITER = "[\n\r%s.,;:!?–—―]"
+
 -- Physical layout follows the UI language setting; anything without a
 -- dedicated M.layouts entry falls back to "us". "C" is KOReader's
 -- untranslated-source-strings locale (English) -- there is no separate "en"
@@ -91,9 +97,22 @@ InputText.onKeyPress = function(self, key)
             -- Left/Right fall through to the original (arrow move, etc.).
             local mods = key.modifiers or {}
             if mods["Alt"] and not mods["Meta"] then
+                -- getStringPos scans outward from the live charpos for the
+                -- delimiter above, but doesn't skip past a delimiter char
+                -- the cursor is already sitting on. Without this, landing
+                -- exactly on a word boundary (which moveCursorToCharPos
+                -- below always does) makes the next press's scan match that
+                -- same adjacent delimiter immediately and return the same
+                -- position again -- deadlocking on the first boundary.
                 if key.key == "Left" then
+                    while self.charpos > 1 and self.charlist[self.charpos - 1]:find(WORD_DELIMITER) do
+                        self.charpos = self.charpos - 1
+                    end
                     self:moveCursorToCharPos(self:getStringPos(true, true))
                 else
+                    while self.charpos <= #self.charlist and self.charlist[self.charpos]:find(WORD_DELIMITER) do
+                        self.charpos = self.charpos + 1
+                    end
                     local _, end_pos = self:getStringPos(true, false)
                     self:moveCursorToCharPos(end_pos + 1)
                 end
